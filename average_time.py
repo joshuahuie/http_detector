@@ -9,6 +9,9 @@ class average_time:
         self.requests = 0
         self.seconds = 0
         self.average = 0
+
+    def return_requests(self):
+        return self.requests
     
     def add_requests(self,amount):
         self.requests += amount
@@ -33,10 +36,12 @@ class average_time:
 
     def __lt__(self,other):
         return self.average < other.average
+
+    def __str__(self):
+        return "Requests:{}, Seconds:{}, Average:{}".format(self.requests,self.seconds,self.average)
     
 
 
         # we need to calculate an average for two minutes
         # we also need a global average
-
         # we will test when global > avg for two min, or global < avg for two min
