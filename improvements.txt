@@ -1,8 +1,6 @@
-To improve this application design, I'd first add additional alerting logic to monitor instant change. 
-I'd add logic so that if there's a large change in the number of requests in a few seconds, 
-the program should print out whether there's high or low traffic. 
-This change would be included with the two minute total traffic detector, 
-so that there'd be diagnostic info on whether there was a large drop or increase in a short period of time.
-I would implement this similarly to how I implemented the two minute traffic detector. 
-I'd compare whether the total traffic in a few seconds time either dropped or exceeded the average amount of traffic.
-
+To improve this application design, I'd add additional alerting logic to monitor quick changes in traffic. 
+This additional logic would detect if there's a large change in the number of requests every few seconds. 
+The program should then print out whether there's high or low traffic. 
+I would implement the logic in a similar way to the the two minute traffic detector. 
+I'd check whether the total traffic in a few seconds time either dropped or exceeded the average amount of traffic.
+If so, the application would then print that it detected a change in traffic. 
