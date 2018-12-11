@@ -21,7 +21,7 @@ class http_detector:
         self.global_time = average_time()
 
 
-    def sniff_urls(self,packet):
+    def sniff_start(self,packet):
         if packet.haslayer(http.HTTPRequest):
             http_layer = packet.getlayer(http.HTTPRequest)
             ip_layer = packet.getlayer(IP)
@@ -68,10 +68,12 @@ class http_detector:
             self.divider = "-"
 
 
-    def interesting_stats(self):
+    def interesting_stats(self, packets):
         print(self.divider * 100)
         print("Summary Statistics:")
         print("\nTotal Number of HTTP requests so far: {}".format(self.global_time.return_requests()))
+        
+        print("Number of packets detected in 10 seconds: " + str(len(packets)))
         print("\n\n")
         
         self.switch_dividers()
@@ -86,6 +88,12 @@ class http_detector:
                 print("\nWebsite with the most hits: {}".format(key)) 
                 print("Section of the website: {}".format(one_section))
 
+    def return_traffic_type(self,converted_time):
+        if self.two_minutes > self.global_time:
+            return "High traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
+        elif self.two_minutes < self.global_time:
+            return "Low traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
+
 
     def start_sniffing(self):
         timeout = time.time() + 60*2
@@ -95,18 +103,15 @@ class http_detector:
             converted_time = str(datetime.fromtimestamp(current_time).strftime("%A, %B %d, %Y %I:%M:%S"))
             
             if current_time > timeout: # if block determines if there's high traffic or low traffic
-                print(self.two_minutes)
-                print(self.global_time)
+                traffic_str = self.return_traffic_type(converted_time)
+                if traffic_str != None:
+                    print(traffic_str)
 
-                if self.two_minutes > self.global_time:
-                    print("High traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time))
-                elif self.two_minutes < self.global_time:
-                    print("Low traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time))
                 self.two_minutes.clear()
                 timeout = time.time() + 60*2 
         
     
-            sniff(filter='tcp', prn=new.sniff_urls, timeout=10)
+            packets = sniff(filter='tcp', prn=new.sniff_start, timeout=10) #Block sniffs HTTP traffic and updates requests / seconds
             self.global_time.add_seconds(10)
             self.two_minutes.add_seconds(10)
             
@@ -123,7 +128,7 @@ class http_detector:
                 print("\nThere is no current website with max hits\n")
             
 
-            self.interesting_stats()
+            self.interesting_stats(packets)
             self.requests_dict.clear()
 
 
