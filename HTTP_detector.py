@@ -56,7 +56,7 @@ class http_detector:
 
     def get_max(self):
         if self.requests_dict:
-            return max(self.requests_dict)
+            return max(self.requests_dict.iterkeys(), key=(lambda key: self.requests_dict[key]))
         else:
             return None
 
