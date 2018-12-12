@@ -116,12 +116,12 @@ class HttpDetector:
     def interesting_stats(self, packets):
         """ Prints interesting stats: num of HTTP requests and num of detected packets"""
 
-        print("Summary Statistics:")
-        print("\nTotal Number of HTTP requests so far: {}".format(self.global_time.return_requests()))
+        print("\n# Summary Statistics:")
+        print("Total Number of HTTP requests so far: {}".format(self.global_time.return_requests()))
         
         print("Number of packets detected in 10 seconds: " + str(len(packets)))
         print(self.divider * 100)
-        print("\n")
+
         
 
 
@@ -137,9 +137,10 @@ class HttpDetector:
 
         max_links = sorted(dict_base_sections, key=dict_base_sections.get, reverse=True)[:3] #Find top three or less base sections
         
+        print("## Sections")
         for link in max_links: 
-            print("-Section: {}".format(link))
-            print("-Hits: {}".format(dict_base_sections[link]))
+            print("- Section: {}".format(link))
+            print("Hits: {}".format(dict_base_sections[link]))
 
 
 
@@ -163,7 +164,7 @@ class HttpDetector:
     def start_sniffing(self):
         """Main function in charge of printing diagonstic information and updating requests/seconds"""
  
-        print("Program has started.\n")
+        print("Collecting HTTP packets.\n")
         timeout = time.time() + 60*2 # Two minutes ahead
 
         while True:
@@ -188,13 +189,13 @@ class HttpDetector:
 
             print("Current Time: {}".format(datetime.now()))
             
-            print("HTTP Info:")
+            print("\n# HTTP Info:")
             
 
             if self.requests_dict: # if requests > 0
                 base_site, num_hits = self.find_website_most_hits() #returns the base website with the most hits its number of hits
-                print("\nWebsite: " + base_site)
-                print("Website had " + str(num_hits) + " hits\n")
+                print("Most Popular Website: " + base_site)
+                print(str(num_hits) + " hits\n")
                 self.print_max_links(base_site) 
 
             else:
