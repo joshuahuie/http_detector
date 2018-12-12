@@ -1,5 +1,5 @@
 class AverageTime:
-    """Class is compare and calculate averages from an inputted number of requests and seconds"""
+    """Class is used to compare and calculate averages from requests and seconds"""
     def __init__(self):
         """Initialize the class with a number
         of requests, seconds, and averages set to 0
