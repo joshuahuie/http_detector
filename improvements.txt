@@ -4,3 +4,5 @@ The program should then print out whether there's high or low traffic.
 I would implement the logic in a similar way to the the two minute traffic detector. 
 I'd check whether the total traffic in a few seconds time either dropped or exceeded the average amount of traffic.
 If so, the application would then print that it detected a change in traffic. 
+
+# printing, tested all of my code, timing

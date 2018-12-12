@@ -21,8 +21,8 @@ class HttpDetector:
         self.alerts = []
     
 
-        self.two_minutes = AverageTime()
-        self.global_time = AverageTime()
+        self.avg_two_min_time = AverageTime()
+        self.avg_global_time = AverageTime()
 
 
     def sniff_start(self,packet):
@@ -37,8 +37,8 @@ class HttpDetector:
             http_link = "http://{[Host]}{[Path]}".format(http_layer.fields,http_layer.fields)
             
             self.insert(http_link,self.requests_dict,1)
-            self.global_time.add_requests(1)
-            self.two_minutes.add_requests(1)
+            self.avg_global_time.add_requests(1)
+            self.avg_two_min_time.add_requests(1)
 
 
     def insert(self,link,current_dict,amount):
@@ -97,7 +97,7 @@ class HttpDetector:
                     return  "http://{}/{}".format(parsed_path[2],parsed_path[3])            
 
 
-    def get_max(self):
+    def get_max_hits(self):
         """Returns the link with the most hits"""
 
         if self.requests_dict:
@@ -117,7 +117,7 @@ class HttpDetector:
         """ Prints interesting stats: num of HTTP requests and num of detected packets"""
 
         print("\n# Summary Statistics:")
-        print("Total Number of HTTP requests so far: {}".format(self.global_time.return_requests()))
+        print("Total Number of HTTP requests so far: {}".format(self.avg_global_time.return_requests()))
         
         print("Number of packets detected in 10 seconds: " + str(len(packets)))
         print(self.divider * 100)
@@ -140,23 +140,23 @@ class HttpDetector:
         print("## Sections")
         for link in max_links: 
             print("- Section: {}".format(link))
-            print("Hits: {}".format(dict_base_sections[link]))
+            print("  Hits: {}".format(dict_base_sections[link]))
 
 
 
     def return_traffic_type(self,converted_time):
         """Returns whether or not there is high traffic or low traffic"""
-        if self.two_minutes > self.global_time:
-            return "High traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
-        elif self.two_minutes < self.global_time:
-            return "Low traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
+        if self.avg_two_min_time > self.avg_global_time:
+            return "High traffic generated an alert - hits = {value}, triggered at {time}".format(value=self.avg_two_min_time.return_requests(),time=converted_time)
+        elif self.avg_two_min_time < self.avg_global_time:
+            return "Low traffic generated an alert - hits = {value}, triggered at {time}".format(value=self.avg_two_min_time.return_requests(),time=converted_time)
         
         return None
 
     def print_previous_alerts(self):
         """If there are previous alerts, function will print them from self.alerts"""
         if self.alerts:
-            print("Previous Alerts:")
+            print("# Previous Alerts:")
             for alert in self.alerts:
                 print(alert)
 
@@ -166,6 +166,7 @@ class HttpDetector:
  
         print("Collecting HTTP packets.\n")
         timeout = time.time() + 60*2 # Two minutes ahead
+        print(self.divider * 100)
 
         while True:
             self.print_previous_alerts()
@@ -175,16 +176,17 @@ class HttpDetector:
             if current_time > timeout: # if block determines if there's high traffic or low traffic(diagnostic message)
                 traffic_str = self.return_traffic_type(converted_time) 
                 if traffic_str:
+                    print("# Alert")
                     print(traffic_str)
                     self.alerts.append(traffic_str)
 
-                self.two_minutes.clear()
+                self.avg_two_min_time.clear()
                 timeout = time.time() + 60*2 
               
 
             packets = sniff(filter='tcp', prn=self.sniff_start, timeout=10) #Blocks and sniffs HTTP traffic: calls self.sniff_start and updates requests / seconds
-            self.global_time.add_seconds(10)
-            self.two_minutes.add_seconds(10)
+            self.avg_global_time.add_seconds(10)
+            self.avg_two_min_time.add_seconds(10)
 
 
             print("Current Time: {}".format(datetime.now()))
@@ -199,7 +201,7 @@ class HttpDetector:
                 self.print_max_links(base_site) 
 
             else:
-                print("\nThere is no current website with max hits\n")
+                print("No detected HTTP requests\n")
             
 
             self.interesting_stats(packets)
