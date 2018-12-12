@@ -159,6 +159,7 @@ class HttpDetector:
             print("# Previous Alerts:")
             for alert in self.alerts:
                 print(alert)
+            print 
 
 
     def start_sniffing(self):

@@ -1,8 +1,24 @@
-To improve this application design, I'd add additional alerting logic to monitor quick changes in traffic. 
-This additional logic would detect if there's a large change in the number of requests every few seconds. 
-The program should then print out whether there's high or low traffic. 
-I would implement the logic in a similar way to the the two minute traffic detector. 
+To improve this application design, I'd firstly make changes to how I implemented printing.
+If I had more time, I would change how I printed out every chunk of information. In this project, I did this by
+making print statements that would be displayed for ten seconds while Scapy's Sniff function was blocking. I would have 
+liked to have used methods like "os.system('clear')" to clear the screen so that each chunk of print statements appeared
+right at the top of the console window. However, I designed this program to be in a while loop, so if this method was used
+it would constantly clear the screen and no information would be shown. However, if properly structured, this change would make the output
+appear clean and organized.
+
+Other than printing, I would have liked to have implemented more exhaustive unit tests. Given the amount of time, I wrote
+simple unit tests that verifyed that the alerting logic worked correctly. However, I would have liked to have tested each 
+individual method in my HttpDetector class. Although I made sure to verify correctness in my code, writing more tests would show
+even more that my code was correct and robust.
+
+I would have also implemented more exact timing. In this project, I implemented the timing by first using functions like "sniff" 
+and then setting a 10 second timeout. I then performed all my calculations using my AverageTime objects to set the number
+of requests and seconds that had passed. Although the time gap between "sniffing" and using the AverageTime objects was small, 
+I would have like to have implemented some parallelisation to time and sniff packets at the same time. I was looking to use threads
+and Python's threading library to accomplish this.
+
+Lastly, I'd add additional alerting logic to monitor quick changes in traffic. 
+This additional logic would detect if there was a large change in the number of requests every few seconds. 
+The program would be implemented in a similiar way to how the two minute traffic detector was implemented. 
 I'd check whether the total traffic in a few seconds time either dropped or exceeded the average amount of traffic.
 If so, the application would then print that it detected a change in traffic. 
-
-# printing, tested all of my code, timing
