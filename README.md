@@ -8,7 +8,7 @@ This application prints both detected http requests and the detected number of p
 
 
 ## Quick Start
-
+Application must be run as a root user.
 To get started with the app quickly, run make:
 
 ```
@@ -25,6 +25,7 @@ make test
 
 ## Manual Run
 
+Application must be run as a root user
 To run the application manually, first install all the dependencies located in requirements.txt:
 
 ```
