@@ -1,5 +1,5 @@
 import unittest
-from HTTP_detector import http_detector as hd
+from HttpDetector import HttpDetector as hd
 import time
 from datetime import datetime
 

@@ -2,7 +2,7 @@ from scapy.all import IP
 from scapy.all import sniff
 from scapy.layers import http
 from datetime import datetime
-from average_time import average_time
+from AverageTime import AverageTime
 from threading import Thread
 
 import time
@@ -12,15 +12,17 @@ import os
 
 
 
-class http_detector:
+class HttpDetector:
     def __init__(self):
         """Initalizes the class"""
-        self.requests_dict = {}
-        self.divider = "-"
-        self.alerts = []
 
-        self.two_minutes = average_time()
-        self.global_time = average_time()
+        self.requests_dict = {}
+        self.divider = "-" # Character used for dividing text
+        self.alerts = []
+    
+
+        self.two_minutes = AverageTime()
+        self.global_time = AverageTime()
 
 
     def sniff_start(self,packet):
@@ -43,6 +45,7 @@ class http_detector:
         """
         Helper function to insert into dictionary for counting
         """
+
         if current_dict.get(link,None) == None:
             current_dict[link] = amount
         else:
@@ -54,13 +57,13 @@ class http_detector:
         Based on the requests dictionary will return the base url with the most requests 
         and how many times it appeared
         """
-        dict_of_requests = {} #parses the keys to get the base url. creates a dict of base urls, and adds count to it
+
+        dict_of_requests = {} 
         
         for key in self.requests_dict.keys(): # for each link, get the base url, if it exists add appropriate count
             base_url = self.get_base_add(key)
-            #print(base_url, self.requests_dict[key] )
             self.insert(base_url,dict_of_requests,self.requests_dict[key])
-                
+
         if dict_of_requests:
             url_most_appearances = max(dict_of_requests.iterkeys(), key=(lambda key: dict_of_requests[key]))
             return url_most_appearances,dict_of_requests[url_most_appearances] #the base url with most appearances and it's count
@@ -70,6 +73,7 @@ class http_detector:
 
     def get_base_add(self,url):
         """ Gets the host name """
+
         if url:
             parsed_path = url.split("/")
             return "http://{}".format(parsed_path[2])  
@@ -79,6 +83,7 @@ class http_detector:
 
     def get_section(self,max_url):
         """Given a URL, splits it and returns the url with one section"""
+
         if max_url:
             parsed_path = max_url.split("/")
             length = len(parsed_path)
@@ -94,6 +99,7 @@ class http_detector:
 
     def get_max(self):
         """Returns the link with the most hits"""
+
         if self.requests_dict:
             return max(self.requests_dict.iterkeys(), key=(lambda key: self.requests_dict[key]))
         else:
@@ -109,18 +115,19 @@ class http_detector:
 
     def interesting_stats(self, packets):
         """ Prints interesting stats: num of HTTP requests and num of detected packets"""
-        print(self.divider * 100)
+
         print("Summary Statistics:")
         print("\nTotal Number of HTTP requests so far: {}".format(self.global_time.return_requests()))
         
         print("Number of packets detected in 10 seconds: " + str(len(packets)))
-        print("\n\n")
+        print(self.divider * 100)
+        print("\n")
         
-        self.switch_dividers()
 
 
     def print_max_links(self,base_site):
         """ Print top three or less websites based on the base website"""
+
         dict_base_sections = {}
 
         for key,value in self.requests_dict.items():
@@ -133,59 +140,61 @@ class http_detector:
         for link in max_links: 
             print("-Section: {}".format(link))
             print("-Hits: {}".format(dict_base_sections[link]))
-            print("\n")
 
 
 
     def return_traffic_type(self,converted_time):
+        """Returns whether or not there is high traffic or low traffic"""
         if self.two_minutes > self.global_time:
             return "High traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
         elif self.two_minutes < self.global_time:
             return "Low traffic generated an alert - hits = {value}, triggered at {time}\n".format(value=self.two_minutes.return_requests(),time=converted_time)
-
+        
+        return None
 
     def print_previous_alerts(self):
+        """If there are previous alerts, function will print them from self.alerts"""
         if self.alerts:
+            print("Previous Alerts:")
             for alert in self.alerts:
                 print(alert)
 
 
     def start_sniffing(self):
-        print("Program has started.")
+        """Main function in charge of printing diagonstic information and updating requests/seconds"""
+ 
+        print("Program has started.\n")
+        timeout = time.time() + 60*2 # Two minutes ahead
 
-        timeout = time.time() + 60*2
         while True:
-
             self.print_previous_alerts()
             current_time = time.time()
             converted_time = str(datetime.fromtimestamp(current_time).strftime("%A, %B %d, %Y %I:%M:%S"))
             
             if current_time > timeout: # if block determines if there's high traffic or low traffic(diagnostic message)
-                traffic_str = self.return_traffic_type(converted_time)
+                traffic_str = self.return_traffic_type(converted_time) 
                 if traffic_str:
                     print(traffic_str)
                     self.alerts.append(traffic_str)
 
                 self.two_minutes.clear()
                 timeout = time.time() + 60*2 
-        
+              
 
-    
-            packets = sniff(filter='tcp', prn=new.sniff_start, timeout=10) #Blocks and sniffs HTTP traffic: updates requests / seconds
+            packets = sniff(filter='tcp', prn=self.sniff_start, timeout=10) #Blocks and sniffs HTTP traffic: calls self.sniff_start and updates requests / seconds
             self.global_time.add_seconds(10)
             self.two_minutes.add_seconds(10)
-            
+
 
             print("Current Time: {}".format(datetime.now()))
-            print(self.divider * 100)
+            
             print("HTTP Info:")
             
 
-            if self.requests_dict: # If requests > 0
-                base_site, num_hits = self.find_website_most_hits() #returns base website, and number of hits that the base website has appeared
+            if self.requests_dict: # if requests > 0
+                base_site, num_hits = self.find_website_most_hits() #returns the base website with the most hits its number of hits
                 print("\nWebsite: " + base_site)
                 print("Website had " + str(num_hits) + " hits\n")
-                #print(self.requests_dict)
                 self.print_max_links(base_site) 
 
             else:
@@ -194,15 +203,19 @@ class http_detector:
 
             self.interesting_stats(packets)
             self.requests_dict.clear()
+            
+        
+            
 
 
 def signal_handler(sig, frame):
+    """ Handles interruptions, Used later in program to capture SIGINT"""
     print("\nStopped Program Successfully.")
     sys.exit(1)
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-
-    new = http_detector()
+    
+    new = HttpDetector()
     new.start_sniffing()
