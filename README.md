@@ -1,11 +1,26 @@
 # HTTP_Detector
 
+## Description
+
+This Python application harnesses the power of packet manipulation tools like Scapy to sniff HTTP requests from your local computer and print them out to your console.
+
+This application prints both detected http requests and the detected number of packets to the console every ten seconds. Specifically, it lists the most requested website along with its top three most requested sections. Lastly, this application generates alerts whenever the traffic for the past two minutes exceeds or drops from the average total traffic. 
+
+
 ## Quick Start
 
 To get started with the app quickly, run make:
 
 ```
 make 
+```
+
+## Test Cases
+
+To run testcases on the alerting logic, run:
+
+```
+make test
 ```
 
 ## Manual Run
@@ -16,16 +31,10 @@ To run the application manually, first install all the dependencies located in r
 pip install -r requirements.txt
 ```
 
-Secondly, run the unit tests.
-
-```
-python2 TestCases.py
-```
-
 Lastly, run the http_detector app:
 
 ```
-python2 HTTP_detector.py
+python2 HttpDetector.py
 ```
 
 ## Exiting the Program
